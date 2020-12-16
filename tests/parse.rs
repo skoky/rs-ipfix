@@ -7,6 +7,50 @@ mod tests {
     use self::ipfix::{IpfixConsumer, IpfixPrinter};
 
     #[test]
+    fn parse_swah() {
+        let data = "000a01ac5f4a6e810000142a000001000109019c5e66335f0a149b5a000006f9f9d2dfee6202000000020000000000000000000000280000000000000001000001743abf6e5e000001743abf6e5e0a149b5a5e66335f000006ffffee62d2df14000000000000000200000000000000280000000000000001000001743abf6e5f000001743abf6e5f0a149b5ad83ac9630000067f7f1b2b01bb100000000e0000000200000000000000290000000000000001000001743abf6e64000001743abf6e640a149b5ad83ac94e0000067f7f1b2901bb100000000e0000000200000000000000290000000000000001000001743abf6e64000001743abf6e64d83ac9630a149b5a000006797901bb1b2b10000000020000000e00000000000000340000000000000001000001743abf6e70000001743abf6e70d83ac94e0a149b5a000006797901bb1b2910000000020000000e00000000000000340000000000000001000001743abf6e73000001743abf6e730a149b5a8efa1bbc0000063f3f13e701bb100000000e0000000200000000000000340000000000000001000001743abf6f92000001743abf6f920000";
+        let decoded = hex::decode(data).expect("Decoding failed");
+        // println!("{:?}", decoded);
+
+        let mut parser = IpfixConsumer::new();
+
+        let printer = IpfixPrinter::new();
+
+        // assert!(parser.parse_message(&*template).is_ok());
+
+        // if let Ok(dataRecords) = parser.parse_message(&*decoded) {
+        match parser.parse_message(&*decoded) {
+            Ok(data) => {
+                println!("ok {}",data.len());
+                let mut test_string = String::new();
+                for dataRecord in data {
+                    let flows = printer.print_json(dataRecord);
+                    for flow in flows {
+                        test_string += &flow;
+                    }
+                    println!("{}",test_string)
+                }
+            },
+            Err(e) => println!("error parsing header: {:?}", e)
+        }
+            // let mut test_string = String::new();
+            // for dataRecord in dataRecords {
+            //     let flows = printer.print_json(dataRecord);
+            //     for flow in flows {
+            //         test_string += &flow;
+            //     }
+            //     println!("{}",test_string)
+            // }
+
+
+            // let mut f = File::open("tests/string.txt").unwrap();
+            // let mut s = String::new();
+            // f.read_to_string(&mut s).unwrap();
+            // assert_eq!(s, test_string);
+        // }
+    }
+
+    #[test]
     fn test_parse() {
         // contains templates 500, 999, 501
         let template_bytes: [u8; 292] =
@@ -117,11 +161,11 @@ mod tests {
         let data = Box::new(data_bytes);
 
         let mut parser = IpfixConsumer::new();
-        
+
         let printer = IpfixPrinter::new();
 
         assert!(parser.parse_message(&*template).is_ok());
-        
+
         if let Ok(datarecords) = parser.parse_message(&*data) {
             let mut test_string = String::new();
             for datarecord in datarecords {

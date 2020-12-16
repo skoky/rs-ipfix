@@ -10,3 +10,6 @@ license = "MIT"
 [dependencies.nom]
 version = "^2.0"
 features = ["verbose-errors"]
+
+[dependencies]
+hex = "0.4.2"
